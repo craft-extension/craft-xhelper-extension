@@ -1,0 +1,10 @@
+{
+  "id": "com.xheldon.extension-xhelper-craft",
+  "name": "Xhelper打包插件",
+  "fileName": "craft-xhelper-extension",
+  "author" : "Xheldon",
+  "author-email" : "c1006044256@gmail.com",
+  "description" : "调用 xhelper 打包的插件",
+  "api": "0.1.0",
+  "main": "index.html"
+}
