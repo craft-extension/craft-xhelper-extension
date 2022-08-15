@@ -292,10 +292,20 @@ export const craftBlockToMarkdown = (block, key, blocks) => {
         case 'imageBlock': {
             // Note: 引用的 unsplash 图片，通过 block.url 访问地址，自己上传的一样。区别是 block.previewUrl 前者没值，后者有
             const next = blocks[key + 1];
-            if (next?.style?.textStyle === 'caption') {
-                return `{% render_caption caption="${next.content[0]?.text || block.filename}" img="${block.url}" %}\n![${block.filename || '__Unsplash__'}](${block.url})\n{% endrender_caption %}\n`
+            if (next?.style?.textStyle === 'caption' && next.content[0]?.text) {
+                return `{% render_caption caption="${next.content[0]?.text}" img="${block.url}" %}\n![${next.content[0]?.text}](${block.url})\n{% endrender_caption %}\n`
             }
-            return `![${block.filename || 'Unsplash'}](${block.url})\n`;
+            if (block.filename) {
+                // Note: 此时 filename 可能带后缀，去掉一下
+                let filename = block.filename;
+                let arr = filename.split('.');
+                if (arr.length > 1) {
+                    filename = arr.slice(0, arr.length - 1).join('');
+                }
+                return `{% render_caption caption="${filename}" img="${block.url}" %}\n![${filename}](${block.url})\n{% endrender_caption %}\n`
+            } else {
+                return `![${block.filename || 'Image'}](${block.url})\n`;
+            }
         }
         case 'urlBlock': {
             // Note: 将其渲染成 jekyll 自定义标签内容，然后通过自定义插件，构建类似于 Craft、Notion 的 bookmark 的效果
