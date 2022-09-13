@@ -317,11 +317,23 @@ export const craftBlockToMarkdown = (block, key, blocks) => {
             if (block.language === 'math_formula') {
                 // Note: markdown 不支持公式
             }
-            return `\`\`\`${block.language}\n${block.code}\n\`\`\`\n`;
+            return indent + `\`\`\`${block.language}\n${indent}${block.code}\n${indent}\`\`\`\n`;
         }
         case 'fileBlock': {
             // 文件不支持
             return ''
+        }
+        case 'videoBlock': {
+            if (block.filename) {
+                let filename = block.filename;
+                let suffix = '';
+                let arr = filename.split('.');
+                if (arr.length > 1) {
+                    filename = arr.slice(0, arr.length - 1).join('');
+                    suffix = arr[arr.length - 1];
+                }
+                return `{% render_video caption="${filename}" img="${block.url}" suffix="${suffix}" %}\n![${filename}](${block.url})\n{% endrender_video %}\n`
+            }
         }
     };
 };
