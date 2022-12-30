@@ -117,7 +117,10 @@ export const syncToGithub = async (sync, forceToWechat = false) => {
         // Note: 此处获取到 markdown，加上所有配置也齐全了，可以开始同步了
         // Note: 需要先发送获取该文件的请求，以检查该文件是否存在，如果存在，则需要提供该文件的 sha（在返回的结果中有该值）
         //  如果不存在则不需要该值
-        const octokit = new Octokit({auth: TOKEN});
+        let octokit = {};
+        if (sync) {
+            octokit = new Octokit({auth: TOKEN});
+        }
         // Note: 先获取该地址，如果不存在则新建，如果存在则需要拿到该文件的 sha 值进行更新
         let content = '';
         if (metaMarkdown) {
@@ -309,7 +312,20 @@ export const craftBlockToMarkdown = (block, key, blocks) => {
         }
         case 'urlBlock': {
             // Note: 将其渲染成 jekyll 自定义标签内容，然后通过自定义插件，构建类似于 Craft、Notion 的 bookmark 的效果
-            return `{% render_bookmark url="${block.url}" title="${block.title || ''}" img="${block.imageUrl || ''}" %}\n${block.pageDescription || ''}\n{% endrender_bookmark %}\n`;
+            // youtube 和 bilibili 链接支持
+            let url = new URL(block.url);
+            let yid = '';
+            let bid = '';
+            if (url.hostname === 'www.youtube.com') {
+                for (let i of url.searchParams) {
+                    if (i[0] === 'v') {
+                        yid = i[1];
+                    }
+                }
+            } else if (url.hostname === 'www.bilibili.com') {
+                bid = url.pathname.split('/').filter(Boolean)[1];
+            }
+            return `{% render_bookmark url="${block.url}" title="${block.title || ''}" img="${block.imageUrl || ''}" yid="${yid}" bid="${bid}" %}\n${block.pageDescription || ''}\n{% endrender_bookmark %}\n`;
         }
         case 'codeBlock': {
             // Note: 代码块，通过 block.code 为其内容，block.language 为语言
